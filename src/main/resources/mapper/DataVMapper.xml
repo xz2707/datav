@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.datav.mybatis.mapper.DataVMapper">
+    <select id="gettest" resultType="com.datav.mybatis.model.DataVParamVo">
+        SELECT
+            SUM(o.ad_contextprice) AS ad_contextprice
+        FROM
+            t_order o
+        WHERE o.retain_2 &gt;= #{time1} AND o.retain_2 &lt;= #{time2}
+    </select>
+
+    <!-- 季度累计销售额-->
+    <select id="getTotalSaleMoney" resultType="com.datav.mybatis.model.DataVParamVo">
+        SELECT
+            SUM(o.ad_contextprice) AS ad_contextprice
+        FROM
+            t_order o
+        WHERE o.retain_2 &gt;= #{start_time} AND o.retain_2 &lt;= #{end_time} AND o.status_id != 8
+    </select>
+
+    <!-- 业务员,代理商,人数及总金额-->
+    <select id="getAgentsOrUserInfo" resultType="com.datav.mybatis.model.BusinessAmount">
+        SELECT
+            o.role_id,
+            COUNT(DISTINCT o.user_id) AS people_num,
+            SUM(o.ad_contextprice) AS ad_contextprice
+        FROM
+            t_order o
+        WHERE o.retain_2 &gt;= #{start_time} AND o.retain_2 &lt;= #{end_time} AND o.status_id != 8
+        GROUP BY o.role_id
+    </select>
+
+    <!-- 客户销售额-->
+    <select id="getClientInfo" resultType="com.datav.mybatis.model.DataVParamVo">
+        SELECT
+            ci.client_name,
+            SUM(o.ad_contextprice) as ad_contextprice
+        FROM
+            t_order o
+        LEFT JOIN t_client c ON c.id = o.client_id
+        LEFT JOIN t_clientinfo ci ON ci.id =c.clientinfo_id
+        WHERE o.retain_2 &gt;= #{start_time} AND o.retain_2 &lt;= #{end_time} AND o.status_id != 8
+        GROUP BY ci.client_name
+    </select>
+
+    <!-- 行业占比-->
+    <select id="getIndustryInfo" resultType="com.datav.mybatis.model.DataVParamVo">
+        SELECT
+            ci.industry_id,
+            COUNT(ci.industry_id) AS industry_num
+        FROM
+            t_order o
+        LEFT JOIN t_client C ON o.client_id = C . ID
+        LEFT JOIN t_clientinfo ci ON C .clientinfo_id = ci. ID
+        WHERE o.retain_2 &gt;= #{start_time} AND o.retain_2 &lt;= #{end_time} AND o.status_id != 8
+        GROUP BY ci.industry_id
+    </select>
+
+    <!-- 城市累计销售额-->
+    <select id="getShopNumInfo" resultType="com.datav.mybatis.model.DataVParamVo">
+        SELECT
+            o.ID,
+            o.ad_point,
+            o.ad_contextprice
+        FROM
+            t_order o
+        WHERE o.retain_2 &gt;= #{start_time} AND o.retain_2 &lt;= #{end_time} AND o.status_id != 8
+    </select>
+
+</mapper>
